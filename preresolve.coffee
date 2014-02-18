@@ -11,30 +11,46 @@ preresolve = (file) ->
     in it into ones that have already been `require.resolve`d. This should make
     starting up faster."""
 
-  basedir = path.resolve path.dirname infile
-  infile = file.path
+  basedir = path.resolve path.dirname file.path
   input = file.contents.toString 'utf-8'
 
-  output = input.replace /^([^"]*\b)require\(([^\)]*)\)/g, (_fullMatch, before, toRequireExpr) ->
-    toRequire = eval(toRequireExpr)
-    if resolve.isCore toRequire
-      "#{ before }require(#{ JSON.stringify toRequire })"
-    else
-      resolved = resolve.sync toRequire, { basedir: basedir }
-      #console.error "INFO: #{ toRequireExpr } -> #{ resolved }"
-      "#{ before }require(#{ JSON.stringify ("./" + (path.relative basedir, resolved)) })"
+  #output = input.replace /^([^"']*)\brequire\(([^\)]*)\)/g, (_fullMatch, before, toRequireExpr) ->
+  output = input.replace /\brequire\(([^\)]*)\)/g, (fullMatch, toRequireExpr) ->
+    try
+      toRequire = eval(toRequireExpr)
+      if resolve.isCore toRequire
+        "require(#{ JSON.stringify toRequire })"
+      else
+        resolved = resolve.sync toRequire, { basedir: basedir }
+        #console.error "INFO: #{ toRequireExpr } -> #{ resolved }"
+        "require(#{ JSON.stringify ("./" + (path.relative basedir, resolved)) })"
+    catch e
+      console.error "#{ e.toString() }: Could not figure out what to do with `#{ toRequireExpr }`"
+      fullMatch
 
-  new Buffer output, 'utf-8'
+  file.contents = new Buffer output, 'utf-8'
+  file
 
 if require.main is module
   optimist = require 'optimist'
-  infile = optimist.argv._[0]
 
-  console.log (preresolve new File {
-    cwd: process.cwd()
-    base: path.dirname infile
-    path: infile
-    contents: fs.readFileSync infile
-  }).toString 'utf-8'
+  #infile = optimist.argv._[0]
+  for infile in optimist.argv._
+    #console.log "file=#{ infile }"
+
+    buf = preresolve new File {
+      cwd: process.cwd()
+      base: path.dirname infile
+      path: infile
+      contents: fs.readFileSync infile
+    }
+
+    #outfile = path.resolve outdir, infile
+    #if outfile == infile
+    #  throw new Error "Always use relative paths please"
+    console.log buf.toString 'utf-8'
+
+    #fs.writeFileSync outfile, buf
+
 
 module.exports = preresolve
