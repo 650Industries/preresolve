@@ -1,0 +1,34 @@
+{
+  "name": "preresolve",
+  "version": "0.0.0",
+  "description": "Does require.resolve on require statements in a project in a build step",
+  "main": "preresolve.js",
+  "dependencies": {
+    "gulp": "~3.5.2",
+    "gulp-util": "~2.2.14",
+    "resolve": "~0.6.1",
+    "optimist": "~0.6.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/650Industries/preresolve.git"
+  },
+  "keywords": [
+    "resolve",
+    "compile",
+    "build",
+    "preresolve"
+  ],
+  "author": "650 Industries",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/650Industries/preresolve/issues"
+  },
+  "homepage": "https://github.com/650Industries/preresolve",
+  "devDependencies": {
+    "coffee-script": "~1.7.1"
+  }
+}
