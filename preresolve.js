@@ -8,15 +8,15 @@
 
   resolve = require('resolve');
 
-  preresolve = function(infile) {
+  preresolve = function(infile, basedir) {
     "Takes a file path to a JS file and transforms all the `require` statements\nin it into ones that have already been `require.resolve`d. This should make\nstarting up faster.";
-    var basedir, input, output;
-    basedir = path.resolve(path.dirname(infile));
+    var input, output;
+    if (basedir == null) {
+      basedir = path.resolve(path.dirname(infile));
+    }
     input = fs.readFileSync(infile, 'utf-8');
-    output = input.replace(/(^[^"'].*\b)require\(([^\)]*)\)/g, function(_fullMatch, before, toRequireExpr) {
+    output = input.replace(/^([^"]*\b)require\(([^\)]*)\)/g, function(_fullMatch, before, toRequireExpr) {
       var resolved, toRequire;
-      console.log(require('util').inspect(arguments));
-      console.log("toRequireExpr=" + toRequireExpr);
       toRequire = eval(toRequireExpr);
       if (resolve.isCore(toRequire)) {
         return "" + before + "require(" + (JSON.stringify(toRequire)) + ")";
