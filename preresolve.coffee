@@ -31,26 +31,24 @@ preresolve = (file) ->
   file.contents = new Buffer output, 'utf-8'
   file
 
-if require.main is module
-  optimist = require 'optimist'
-
-  #infile = optimist.argv._[0]
-  for infile in optimist.argv._
-    #console.log "file=#{ infile }"
-
-    buf = preresolve new File {
+preresolveFileWithName = (infile) ->
+  pf = preresolve new File {
       cwd: process.cwd()
       base: path.dirname infile
       path: infile
       contents: fs.readFileSync infile
     }
 
-    #outfile = path.resolve outdir, infile
-    #if outfile == infile
-    #  throw new Error "Always use relative paths please"
-    console.log buf.toString 'utf-8'
+  pf.contents.toString 'utf-8'
 
-    #fs.writeFileSync outfile, buf
+if require.main is module
+  optimist = require 'optimist'
 
+  for infile in optimist.argv._
+    console.log preresolveFileWithName infile
+
+preresolve.preresolveFileWithName = preresolveFileWithName
 
 module.exports = preresolve
+
+
